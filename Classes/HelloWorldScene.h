@@ -13,17 +13,16 @@ public:
 	Sprite* ball;
 	Sprite* paddle;
 
-	float powerMultiplier; // Force
-
 	b2World *world; // World with physic
 	
 	float deltaTime; // The variable to calculate time
 
 	void addWall(float w, float h, float px, float py); // Create the Wall edge around the screen for the ball to collide with.
-
-	void update(float dt); // Update scene by time
 	void defineBall(); // Create the ball follow Box2D
 	void definePaddle(); 
+	void drawBackground();
+
+	void update(float dt); // Update scene by time
 
 	void onMouseMove(Event *event);
 	void onMouseUp(Event *event);
@@ -32,6 +31,7 @@ public:
 	virtual void draw(Renderer *renderer, const Mat4 &transform, uint32_t flags);
     virtual bool init();
     
+	void returnToMenu(cocos2d::Ref* pSender);
     // implement the "static create()" method manually
     CREATE_FUNC(HelloWorld);
 };

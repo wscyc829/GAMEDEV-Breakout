@@ -33,11 +33,11 @@ bool GameMenu::init()
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	auto label = Label::createWithTTF("Welcome To iSnake", "fonts/Marker Felt.ttf", 24);
+	auto label = Label::createWithTTF("Welcome To iBreaker", "fonts/Marker Felt.ttf", 24);
 	label->setColor(Color3B(0, 0, 0));
 	// position the label on the center of the screen
 	label->setPosition(Vec2(origin.x + visibleSize.width / 2,
-		origin.y + visibleSize.height - label->getContentSize().height));
+		origin.y + visibleSize.height - label->getContentSize().height - 10));
 
 	// add the label as a child to this layer
 	this->addChild(label, 1);
@@ -69,10 +69,10 @@ bool GameMenu::init()
 			// Transition Fade
 			//director->replaceScene(TransitionFade::create(0.5, scene, Color3B(0, 255, 255)));
 			// FlipX
-			director->replaceScene(TransitionFlipX::create(2, scene));
+			//director->replaceScene(TransitionFlipX::create(2, scene));
 
 			// Transition Slide In
-			//director->replaceScene(TransitionSlideInT::create(1, scene));
+			director->replaceScene(TransitionSlideInT::create(1, scene));
 
 			// run
 			//director->replaceScene(scene);
@@ -106,75 +106,55 @@ bool GameMenu::init()
 	});
 	this->addChild(quit_button);
 
+	
 	drawBackground();
+	
 	return true;
 }
 
-
 void GameMenu::drawBackground()
 {
+
+	Vec2 ground = {0, 0};
+	Vec2 tree1 = {24, 0};
+	Vec2 tree2 = {48, 0};
+	Vec2 tree3 = {72, 0};
+
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 
-	for (int i = 0; i < visibleSize.width; i += SPRITE_WIDTH)
+	for (int i = 0; i < visibleSize.width / SPRITE_WIDTH; i++)
 	{
-		for (int j = 0; j < visibleSize.height; j += SPRITE_HEIGHT)
+		for (int j = 0; j < visibleSize.height / SPRITE_HEIGHT; j++)
 		{
-			int origin_x = 0;
-			int origin_y = 0;
 
-			if (i == 0)
+			if (j == 0 || j == visibleSize.height / SPRITE_HEIGHT - 1)
 			{
-				if (j == 0)
-				{
-					origin_y = SPRITE_HEIGHT * 2;
-				}
-				else if (j > 0 && j < visibleSize.height - SPRITE_HEIGHT)
-				{
-					origin_y = SPRITE_HEIGHT;
-				}
+				auto s = Sprite::create("tree1.png", Rect(0, 0, SPRITE_WIDTH, SPRITE_HEIGHT));
+				s->setPosition(Vec2(i * SPRITE_WIDTH + SPRITE_WIDTH / 2, j * SPRITE_HEIGHT + SPRITE_HEIGHT / 2));
+				this->addChild(s, -1);
 			}
-			else if (i == visibleSize.width - SPRITE_WIDTH)
+			else if (i == 0)
 			{
-				if (j == 0)
-				{
-					origin_x = SPRITE_WIDTH * 2;
-					origin_y = SPRITE_HEIGHT * 2;
-				}
-				else if (j > 0 && j < visibleSize.height - SPRITE_HEIGHT)
-				{
-					origin_x = SPRITE_WIDTH * 2;
-					origin_y = SPRITE_HEIGHT;
-				}
-				else if (j == visibleSize.height - SPRITE_HEIGHT)
-				{
-					origin_x = SPRITE_WIDTH * 2;
-				}
+				auto s = Sprite::create("tree2.png", Rect(0, 0, SPRITE_WIDTH, SPRITE_HEIGHT));
+				s->setPosition(Vec2(i * SPRITE_WIDTH + SPRITE_WIDTH / 2, j * SPRITE_HEIGHT + SPRITE_HEIGHT / 2));
+				this->addChild(s, -1);
 			}
-			else if (j == 0)
+			else if (i == visibleSize.width / SPRITE_WIDTH - 1)
 			{
-				if (i > 0 && i < visibleSize.width - SPRITE_WIDTH)
-				{
-					origin_x = SPRITE_WIDTH;
-					origin_y = SPRITE_HEIGHT * 2;
-				}
+				auto s = Sprite::create("tree3.png", Rect(0, 0, SPRITE_WIDTH, SPRITE_HEIGHT));
+				s->setPosition(Vec2(i * SPRITE_WIDTH + SPRITE_WIDTH / 2, j * SPRITE_HEIGHT + SPRITE_HEIGHT / 2));
+				this->addChild(s, -1);
 			}
-			else if (j == visibleSize.height - SPRITE_HEIGHT)
-			{
-				if (i > 0 && i < visibleSize.width - SPRITE_WIDTH)
-				{
-					origin_x = SPRITE_WIDTH;
-				}
-			}
+			
 			else
 			{
-				origin_x = SPRITE_WIDTH;
-				origin_y = SPRITE_HEIGHT;
+				auto s = Sprite::create("grasstile.png", Rect(0, 0, SPRITE_WIDTH, SPRITE_HEIGHT));
+				s->setPosition(Vec2(i * SPRITE_WIDTH + SPRITE_WIDTH / 2, j * SPRITE_HEIGHT + SPRITE_HEIGHT / 2));
+				this->addChild(s, -1);
 			}
 
-			createSprite("bg.png", origin_x, origin_y, i, j, -1);
 		}
 	}
-
 }
 
 void GameMenu::createSprite(std::string file, int origin_x, int origin_y, int x, int y, int z)

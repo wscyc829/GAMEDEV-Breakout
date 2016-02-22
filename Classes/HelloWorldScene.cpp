@@ -1,7 +1,7 @@
 ﻿#include "HelloWorldScene.h"
 #include "iostream"
-#include "renderer/CCRenderer.h"
-#include "renderer/CCCustomCommand.h"
+#include "GameMenuScene.h"
+
 #define SCALE_RATIO 32.0
 
 Scene* HelloWorld::createScene()
@@ -31,38 +31,47 @@ bool HelloWorld::init()
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
 	b2Vec2 gravity = b2Vec2(0.0f, 0.0f); 
-	world = new b2World(gravity);
-	this->addChild(B2DebugDrawLayer::create(world, SCALE_RATIO), 99);
 
-	powerMultiplier = 10; // The value of force is 10
+	auto closeItem = MenuItemImage::create(
+		"arrow_normal.png",
+		"arrow_clicked.png",
+		CC_CALLBACK_1(HelloWorld::returnToMenu, this));
+
+	closeItem->setPosition(Vec2(origin.x + visibleSize.width - closeItem->getContentSize().width,
+		origin.y + visibleSize.height - closeItem->getContentSize().height));
+	// create menu, it's an autorelease object
+	auto menu = Menu::create(closeItem, NULL);
+	menu->setPosition(Vec2::ZERO);
+	this->addChild(menu, 1);
+
+	world = new b2World(gravity);
+	this->addChild(B2DebugDrawLayer::create(world, SCALE_RATIO), 9999);
+
+	drawBackground();
+
 	ball = Sprite::create("ball.png");
-	ball->setPosition(Point(500, 500));
+	ball->setPosition(Point(visibleSize.width / 2, visibleSize.height / 2));
 	this->addChild(ball);
 
 	paddle = Sprite::create("paddle.png");
-	paddle->setPosition(Point(500, 10));
+	paddle->setPosition(Point(visibleSize.width / 2, paddle->getContentSize().height / 2 + 5));
 	this->addChild(paddle);
 
 	// Build the frame around three sides of the screen 
-	addWall(visibleSize.width, 10, (visibleSize.width / 2), visibleSize.height);// up
+	addWall(visibleSize.width, 12, (visibleSize.width / 2), visibleSize.height - 12);// up
 	//addWall(visibleSize.width, 10, (visibleSize.width / 2) + 10, 0);// Floor
-	addWall(10, visibleSize.height, 0, (visibleSize.height / 2)); // Left
-	addWall(10, visibleSize.height, visibleSize.width, (visibleSize.height / 2)); // Right
+	addWall(12, visibleSize.height, 12, (visibleSize.height / 2)); // Left
+	addWall(12, visibleSize.height, visibleSize.width - 12, (visibleSize.height / 2)); // Right
 
-	for (int i = 1; i <= 31; i++){
-		//points[i] = Sprite::create("dot.png");
-
-		//this->addChild(points[i]);
-	}
+	isStart = false;
+	defineBall();
+	definePaddle();
 
 	auto listener = EventListenerMouse::create();
 	listener->onMouseMove = CC_CALLBACK_1(HelloWorld::onMouseMove, this);
 	listener->onMouseUp = CC_CALLBACK_1(HelloWorld::onMouseUp, this);
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 
-	isStart = false;
-	defineBall();
-	definePaddle();
 	scheduleUpdate();
 
     return true;
@@ -84,7 +93,8 @@ void HelloWorld::defineBall(){
 	bodyDef.type = b2_dynamicBody;
 	bodyDef.userData = ball;
 	
-	bodyDef.position.Set(500 / SCALE_RATIO,500 / SCALE_RATIO);
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+	bodyDef.position.Set(visibleSize.width / 2 / SCALE_RATIO, visibleSize.height / 2 / SCALE_RATIO);
 	
 	ballBody = world->CreateBody(&bodyDef);
 	ballBody->CreateFixture(&fixtureDef);
@@ -98,10 +108,8 @@ void HelloWorld::definePaddle(){
 	b2FixtureDef fixtureDef; 
 	b2PolygonShape bodyShape; 
 
-	log("size:  %f : %f", paddle->getContentSize().width, paddle->getContentSize().height);
-	log("scale:  %f : %f", paddle->getContentSize().width / SCALE_RATIO, paddle->getContentSize().height / SCALE_RATIO);
-	bodyShape.SetAsBox(paddle->getContentSize().width / SCALE_RATIO, paddle->getContentSize().height / SCALE_RATIO);
-	log("l: %d", bodyShape.GetVertexCount());
+	bodyShape.SetAsBox(paddle->getContentSize().width / 2 /SCALE_RATIO, paddle->getContentSize().height / 2 / SCALE_RATIO);
+
 	fixtureDef.density = 1;
 	fixtureDef.friction = 0.0;
 	fixtureDef.restitution = 0.0;
@@ -114,8 +122,8 @@ void HelloWorld::definePaddle(){
 
 	paddleBody = world->CreateBody(&bodyDef);
 	paddleBody->CreateFixture(&fixtureDef);
-
 }
+
 void HelloWorld::addWall(float w, float h, float px, float py) {
 	b2Body *floorBody;
 	b2BodyDef floorBodyDef;
@@ -137,6 +145,53 @@ void HelloWorld::addWall(float w, float h, float px, float py) {
 	
 }
 
+
+void HelloWorld::drawBackground()
+{
+	int SPRITE_WIDTH = 24;
+	int SPRITE_HEIGHT = 24;
+
+	Vec2 ground = { 0, 0 };
+	Vec2 tree1 = { 24, 0 };
+	Vec2 tree2 = { 48, 0 };
+	Vec2 tree3 = { 72, 0 };
+
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+
+	for (int i = 0; i < visibleSize.width / SPRITE_WIDTH; i++)
+	{
+		for (int j = 0; j < visibleSize.height / SPRITE_HEIGHT; j++)
+		{
+
+			if (j == 0 || j == visibleSize.height / SPRITE_HEIGHT - 1)
+			{
+				auto s = Sprite::create("tree1.png", Rect(0, 0, SPRITE_WIDTH, SPRITE_HEIGHT));
+				s->setPosition(Vec2(i * SPRITE_WIDTH + SPRITE_WIDTH / 2, j * SPRITE_HEIGHT + SPRITE_HEIGHT / 2));
+				this->addChild(s, -1);
+			}
+			else if (i == 0)
+			{
+				auto s = Sprite::create("tree2.png", Rect(0, 0, SPRITE_WIDTH, SPRITE_HEIGHT));
+				s->setPosition(Vec2(i * SPRITE_WIDTH + SPRITE_WIDTH / 2, j * SPRITE_HEIGHT + SPRITE_HEIGHT / 2));
+				this->addChild(s, -1);
+			}
+			else if (i == visibleSize.width / SPRITE_WIDTH - 1)
+			{
+				auto s = Sprite::create("tree3.png", Rect(0, 0, SPRITE_WIDTH, SPRITE_HEIGHT));
+				s->setPosition(Vec2(i * SPRITE_WIDTH + SPRITE_WIDTH / 2, j * SPRITE_HEIGHT + SPRITE_HEIGHT / 2));
+				this->addChild(s, -1);
+			}
+
+			else
+			{
+				auto s = Sprite::create("grasstile.png", Rect(0, 0, SPRITE_WIDTH, SPRITE_HEIGHT));
+				s->setPosition(Vec2(i * SPRITE_WIDTH + SPRITE_WIDTH / 2, j * SPRITE_HEIGHT + SPRITE_HEIGHT / 2));
+				this->addChild(s, -1);
+			}
+
+		}
+	}
+}
 void HelloWorld::update(float dt){
 	int positionIterations = 10;  // Location
 	int velocityIterations = 10; // Velocity
@@ -184,6 +239,7 @@ void HelloWorld::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
 	world->DrawDebugData();
 	director->popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
 }
+
 void HelloWorld::onMouseMove(Event *event)
 {
 	EventMouse* e = (EventMouse*)event;
@@ -231,4 +287,13 @@ bool HelloWorld::onContactBegin(PhysicsContact& contact)
 	}
 
 	return true;
+}
+
+void HelloWorld::returnToMenu(Ref* pSender)
+{
+	auto director = Director::getInstance();
+	auto scene = GameMenu::createScene();
+
+	// run
+	director->replaceScene(TransitionSlideInT::create(1, scene));
 }

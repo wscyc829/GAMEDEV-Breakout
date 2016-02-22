@@ -4,8 +4,8 @@
 
 class GameMenu : public cocos2d::Layer
 {
-	int SPRITE_WIDTH = 30;
-	int SPRITE_HEIGHT = 30;
+	int SPRITE_WIDTH = 24;
+	int SPRITE_HEIGHT = 24;
 public:
 	static cocos2d::Scene* createScene();
 
