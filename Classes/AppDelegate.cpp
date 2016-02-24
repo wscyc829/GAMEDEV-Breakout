@@ -79,7 +79,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	CocosDenshion::SimpleAudioEngine::sharedEngine()->getInstance()->playBackgroundMusic("sounds/background_music.wav", true);
 	CocosDenshion::SimpleAudioEngine::sharedEngine()->getInstance()->preloadEffect("sounds/game_start_sound.wav");
 	CocosDenshion::SimpleAudioEngine::sharedEngine()->getInstance()->preloadEffect("sounds/enemy_killed_sound.wav");
-	CocosDenshion::SimpleAudioEngine::sharedEngine()->getInstance()->preloadEffect("sounds/ball_bouncing.wav");
+	CocosDenshion::SimpleAudioEngine::sharedEngine()->getInstance()->preloadEffect("sounds/ball_bouncing_sound.wav");
 
     // create a scene. it's an autorelease object
     auto scene = GameMenu::createScene();

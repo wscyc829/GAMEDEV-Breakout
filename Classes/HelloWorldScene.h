@@ -15,16 +15,24 @@ class HelloWorld : public cocos2d::Layer
 	int SPRITE_WIDTH = SpriteMaker::SPRITE_WIDTH;
 	int SPRITE_HEIGHT = SpriteMaker::SPRITE_HEIGHT;
 
+	int BALL_TAG = 1;
+	int PADDLE_TAG = 2;
+	int BLOCK_TAG = 3;
+	int BLOCK_BOSS_TAG = 4;
+	int BLOCK_TRESSURE_TAG = 5;
+
 	int BOSS_MAX_HP = 100;
 	int BLOCK_POINT = 1;
 	int BLOCK_BOSS_POINT = 100;
 	int BLOCK_TRESSURE_POINT = 10;
 	int PLAYER_MAX_HP = 3;
+	int SPAWN_TIME = 10;
 
 	int score = 0;
 	int high_score = 0;
+	int spawn_count = 0;
 
-	int boss_hp;
+	int boss_hp = BOSS_MAX_HP;
 	int player_hp;
 
 	bool isStart;
@@ -32,9 +40,11 @@ class HelloWorld : public cocos2d::Layer
 
 	Label* score_label;
 	Label* high_score_label;
+	Label* boss_hp_label;
 
 	Sprite* ball;
 	Sprite* paddle;
+	Sprite* boss;
 
 	b2World *world; // World with physic
 
@@ -49,9 +59,10 @@ public:
 	void addWall(float w, float h, float px, float py); // Create the Wall edge around the screen for the ball to collide with.
 	void defineBall(); // Create the ball follow Box2D
 	void definePaddle();
-	void addBlock();
+	void defineBoss();
+	void spawnEnemies();
 
-	void updateScore();
+	void updateInfo();
 	void update(float dt); // Update scene by time
 	virtual void draw(Renderer *renderer, const Mat4 &transform, uint32_t flags);
 	

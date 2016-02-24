@@ -55,6 +55,16 @@ cocos2d::Sprite* SpriteMaker::createSprite(SpriteList sprite)
 			width = SPRITE_WIDTH;
 			height = SPRITE_HEIGHT;
 			break;
+		case SpriteList::BLOCK_BOSS:
+			file_name = "images/block4.png";
+			width = SPRITE_WIDTH * 2;
+			height = SPRITE_HEIGHT * 2;
+			break;
+		case SpriteList::BLOCK_TRESSURE:
+			file_name = "images/block5.png";
+			width = SPRITE_WIDTH;
+			height = SPRITE_HEIGHT;
+			break;
 		case SpriteList::MOUNTAIN1:
 			file_name = "images/mountain.png";
 			width = SPRITE_WIDTH;

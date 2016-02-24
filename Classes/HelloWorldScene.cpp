@@ -35,24 +35,20 @@ bool HelloWorld::init()
 	this->addChild(B2DebugDrawLayer::create(world, SCALE_RATIO), 9999);
 
 	ball = SpriteMaker::createSprite(SpriteList::BALL);
-	ball->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
-	ball->setTag(1);
+	ball->setPosition(Vec2(visibleSize.width / 2, SPRITE_HEIGHT / 2 * 5));
+	ball->setTag(BALL_TAG);
 	this->addChild(ball, 1);
 
 	paddle = SpriteMaker::createSprite(SpriteList::PADDLE);
 	paddle->setPosition(Vec2(visibleSize.width / 2, SPRITE_HEIGHT / 2 * 3));
+	paddle->setTag(PADDLE_TAG);
 	this->addChild(paddle, 1);
-
-	// Build the frame around three sides of the screen 
-	addWall(visibleSize.width, 12, (visibleSize.width / 2), visibleSize.height - 12);// up
-	addWall(12, visibleSize.height, 12, (visibleSize.height / 2)); // Left
-	addWall(12, visibleSize.height, visibleSize.width - 12, (visibleSize.height / 2)); // Right
 
 	isStart = false;
 	isReturn = false;
 	defineBall();
 	definePaddle();
-	addBlock();
+	defineBoss();
 	drawBackground();
 
 	auto listener = EventListenerMouse::create();
@@ -97,6 +93,13 @@ void HelloWorld::drawBackground()
 			visibleSize.height - high_score_label->getContentSize().height - 12));
 	this->addChild(high_score_label, 1);
 
+	//boss hp
+	//high score
+	boss_hp_label = Label::createWithTTF("Boss HP: 100", "fonts/Marker Felt.ttf", 24);
+	boss_hp_label->setColor(Color3B(0, 0, 0));
+	boss_hp_label->setPosition(Vec2(visibleSize.width / 2,
+		visibleSize.height - boss_hp_label->getContentSize().height - 12));
+	this->addChild(boss_hp_label, 1);
 
 	for (int i = 0; i < visibleSize.width / SPRITE_WIDTH; i++)
 	{
@@ -136,6 +139,11 @@ void HelloWorld::drawBackground()
 			this->addChild(s, -1);
 		}
 	}
+
+	// Build the frame around three sides of the screen
+	addWall(visibleSize.width, 12, (visibleSize.width / 2), visibleSize.height - 12);// up
+	addWall(12, visibleSize.height, 12, (visibleSize.height / 2)); // Left
+	addWall(12, visibleSize.height, visibleSize.width - 12, (visibleSize.height / 2)); // Right
 }
 
 void HelloWorld::defineBall(){
@@ -155,11 +163,11 @@ void HelloWorld::defineBall(){
 	bodyDef.userData = ball;
 	
 	Size visibleSize = Director::getInstance()->getVisibleSize();
-	bodyDef.position.Set(visibleSize.width / 2 / SCALE_RATIO, visibleSize.height / 2 / SCALE_RATIO);
+	bodyDef.position.Set(paddle->getPosition().x / SCALE_RATIO, (paddle->getPosition().y + SPRITE_HEIGHT) / SCALE_RATIO);
 	
 	ballBody = world->CreateBody(&bodyDef);
 	ballBody->CreateFixture(&fixtureDef);
-	ballBody->ApplyLinearImpulse(b2Vec2(10.0f, 10.0f), ballBody->GetWorldCenter(), false);
+	ballBody->ApplyLinearImpulse(b2Vec2(5.0f, 5.0f), ballBody->GetWorldCenter(), false);
 }
 
 void HelloWorld::definePaddle(){
@@ -206,40 +214,77 @@ void HelloWorld::addWall(float w, float h, float px, float py) {
 	floorBody->CreateFixture(&floorFixtureDef);
 }
 
-void HelloWorld::addBlock()
+void HelloWorld::defineBoss()
 {
-	for (int i = 0; i < 10; i++) 
-	{
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+	//the boss
+	boss = SpriteMaker::createSprite(SpriteList::BLOCK_BOSS);
 
-		static int padding = 20;
+	float x = visibleSize.width / 2;
+	float y = visibleSize.height - boss->getContentSize().height * 2;
+	boss->setPosition(Vec2(x, y));
+	boss->setTag(BLOCK_BOSS_TAG);
+	this->addChild(boss);
 
-		Sprite *block = SpriteMaker::createSprite(SpriteList::BLOCK1);
-		int xOffset = padding + block->getContentSize().width / 2 +
-				((block->getContentSize().width + padding)*i);
-		block->setPosition(ccp(xOffset, 250));
-		block->setTag(2);
-		this->addChild(block);
+	// Create block body
+	b2BodyDef blockBodyDef;
+	blockBodyDef.type = b2_kinematicBody;
+	blockBodyDef.position.Set(x / SCALE_RATIO, y / SCALE_RATIO);
+	blockBodyDef.userData = boss;
+	b2Body *blockBody = world->CreateBody(&blockBodyDef);
 
-		// Create block body
-		b2BodyDef blockBodyDef;
-		blockBodyDef.type = b2_staticBody;
-		blockBodyDef.position.Set(xOffset / SCALE_RATIO, 250 / SCALE_RATIO);
-		blockBodyDef.userData = block;
-		b2Body *blockBody = world->CreateBody(&blockBodyDef);
+	// Create block shape
+	b2PolygonShape blockShape;
+	blockShape.SetAsBox(boss->getContentSize().width / SCALE_RATIO / 2,
+		boss->getContentSize().height / SCALE_RATIO / 2);
 
-		// Create block shape
-		b2PolygonShape blockShape;
-		blockShape.SetAsBox(block->getContentSize().width / SCALE_RATIO / 2,
-				block->getContentSize().height / SCALE_RATIO / 2);
+	// Create shape definition and add to body
+	b2FixtureDef blockShapeDef;
+	blockShapeDef.shape = &blockShape;
+	blockShapeDef.density = 10.0;
+	blockShapeDef.friction = 0.0;
+	blockShapeDef.restitution = 0.0f;
+	blockBody->CreateFixture(&blockShapeDef);
+}
 
-		// Create shape definition and add to body
-		b2FixtureDef blockShapeDef;
-		blockShapeDef.shape = &blockShape;
-		blockShapeDef.density = 10.0;
-		blockShapeDef.friction = 0.0;
-		blockShapeDef.restitution = 0.0f;
-		blockBody->CreateFixture(&blockShapeDef);
+void HelloWorld::spawnEnemies()
+{
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+	int w = visibleSize.width / SPRITE_WIDTH - 2;
+	int h = visibleSize.height / SPRITE_HEIGHT / 2 - 5;
+	float x = (floor(rand() % w) + 1.5) * SPRITE_WIDTH;
+	float y = (floor(rand() % h) + visibleSize.height / SPRITE_WIDTH / 2 + 2) * SPRITE_HEIGHT;
+
+	Vec2 p = boss->getPosition();
+	if (x > p.x - SPRITE_WIDTH && x < p.x + SPRITE_WIDTH &&
+		y > p.y - SPRITE_HEIGHT && y < p.y + SPRITE_HEIGHT){
+		log("hit boss");
+		return;
 	}
+	Sprite *block = SpriteMaker::createSprite(SpriteList::BLOCK1);
+	block->setPosition(x, y);
+	block->setTag(BLOCK_TAG);
+	this->addChild(block);
+
+	// Create block body
+	b2BodyDef blockBodyDef;
+	blockBodyDef.type = b2_kinematicBody;
+	blockBodyDef.position.Set(x / SCALE_RATIO, y / SCALE_RATIO);
+	blockBodyDef.userData = block;
+	b2Body *blockBody = world->CreateBody(&blockBodyDef);
+
+	// Create block shape
+	b2PolygonShape blockShape;
+	blockShape.SetAsBox(block->getContentSize().width / SCALE_RATIO / 2,
+		block->getContentSize().height / SCALE_RATIO / 2);
+
+	// Create shape definition and add to body
+	b2FixtureDef blockShapeDef;
+	blockShapeDef.shape = &blockShape;
+	blockShapeDef.density = 10.0;
+	blockShapeDef.friction = 0.0;
+	blockShapeDef.restitution = 0.0f;
+	blockBody->CreateFixture(&blockShapeDef);
 }
 
 void HelloWorld::update(float dt)
@@ -256,10 +301,11 @@ void HelloWorld::update(float dt)
 		for (b2Body *body = world->GetBodyList(); body != NULL; body = body->GetNext())
 		{
 			// Consider which body is attached to Sprite
+			
 			if (body->GetUserData())
 			{
 				Sprite* b = static_cast<Sprite*>(body->GetUserData());
-				if (b == ball)
+				if (b->getTag() == BALL_TAG)
 				{	
 					// Set the position again for this Sprite follow the position of body 
 					//( body is gradually falling by time), 
@@ -272,12 +318,16 @@ void HelloWorld::update(float dt)
 						isStart = false;
 						world->DestroyBody(body);
 						defineBall();
-						ball->setPosition(Point(visibleSize.width / 2, visibleSize.height / 2));
+						ball->setPosition(Point(paddle->getPosition().x, paddle->getPosition().y + SPRITE_HEIGHT));
+
+						score = 0;
+						boss_hp = BOSS_MAX_HP;
 					}
 				}
-				else if (b == paddle)
+				else if (b->getTag() == PADDLE_TAG)
 				{
-					body->SetTransform(b2Vec2(paddle->getPosition().x / SCALE_RATIO, paddle->getPosition().y / SCALE_RATIO), 0);
+					body->SetTransform(b2Vec2(paddle->getPosition().x / SCALE_RATIO, 
+							paddle->getPosition().y / SCALE_RATIO), 0);
 				}
 			}
 		}
@@ -297,25 +347,62 @@ void HelloWorld::update(float dt)
 				CCSprite *spriteB = (CCSprite *)bodyB->GetUserData();
 
 				// Sprite A = ball, Sprite B = Block
-				if (spriteA->getTag() == 1 && spriteB->getTag() == 2) 
+				if (spriteA->getTag() == BALL_TAG)
 				{
-					if (std::find(toDestroy.begin(), toDestroy.end(), bodyB)
-						== toDestroy.end()) {
-						toDestroy.push_back(bodyB);
+					if (spriteB->getTag() == BLOCK_TAG){
+						if (std::find(toDestroy.begin(), toDestroy.end(), bodyB)
+							== toDestroy.end()) 
+						{
+							toDestroy.push_back(bodyB);
+							score++;
+						}
+					}
+					else if (spriteB->getTag() == BLOCK_BOSS_TAG)
+					{
+						if (boss_hp > 0)
+						{
+							boss_hp--; 
+							score++;
+						}
+						else if (std::find(toDestroy.begin(), toDestroy.end(), bodyB)
+								== toDestroy.end()) 
+						{
+							toDestroy.push_back(bodyB);
+							score++;
+						}
 					}
 				}
 				// Sprite A = block, Sprite B = ball
-				else if (spriteA->getTag() == 2 && spriteB->getTag() == 1) 
+				else if (spriteB->getTag() == BALL_TAG)
 				{
-					if (std::find(toDestroy.begin(), toDestroy.end(), bodyA)
-						== toDestroy.end()) {
-						toDestroy.push_back(bodyA);
+					if (spriteA->getTag() == BLOCK_TAG)
+					{
+						if (std::find(toDestroy.begin(), toDestroy.end(), bodyA)
+							== toDestroy.end()) {
+							toDestroy.push_back(bodyA);
+							score++;
+						}
+					}
+					else if (spriteA->getTag() == BLOCK_BOSS_TAG)
+					{
+						if (boss_hp > 0)
+						{
+							boss_hp--;
+							score++;
+						}
+						else if (std::find(toDestroy.begin(), toDestroy.end(), bodyB)
+								== toDestroy.end()) 
+						{
+							toDestroy.push_back(bodyB);
+							score++;
+						}
 					}
 				}
 			}
 			else //
 			{
-				CocosDenshion::SimpleAudioEngine::sharedEngine()->getInstance()->playEffect("sounds/ball_bouncing.wav");
+				CocosDenshion::SimpleAudioEngine::sharedEngine()
+					->getInstance()->playEffect("sounds/ball_bouncing_sound.wav");
 			}
 		}
 
@@ -328,8 +415,6 @@ void HelloWorld::update(float dt)
 			{
 				CCSprite *sprite = (CCSprite *)body->GetUserData();
 				this->removeChild(sprite, true);
-
-				score++;
 			}
 			world->DestroyBody(body);
 		}
@@ -344,12 +429,22 @@ void HelloWorld::update(float dt)
 		if (toDestroy.size() > 0)
 		{
 			CocosDenshion::SimpleAudioEngine::sharedEngine()->getInstance()->playEffect("sounds/enemy_killed_sound.wav");
-			updateScore();
+		}
+		updateInfo();
+
+		if (spawn_count == SPAWN_TIME)
+		{
+			spawn_count = 0;
+			spawnEnemies();
+		}
+		else
+		{
+			spawn_count++;
 		}
 	}
 }
 
-void HelloWorld::updateScore()
+void HelloWorld::updateInfo()
 {
 	std::string s = "Score: ";
 	s += std::to_string(score);
@@ -362,6 +457,10 @@ void HelloWorld::updateScore()
 		s += std::to_string(high_score);
 		high_score_label->setString(s);
 	}
+
+	s = "Boss HP: ";
+	s += std::to_string(boss_hp);
+	boss_hp_label->setString(s);
 }
 
 void HelloWorld::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
