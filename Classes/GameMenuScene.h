@@ -1,17 +1,20 @@
 #pragma once
 
 #include "cocos2d.h"
+#include "SpriteMaker.h"
+#include "SimpleAudioEngine.h"
 
 class GameMenu : public cocos2d::Layer
 {
-	int SPRITE_WIDTH = 24;
-	int SPRITE_HEIGHT = 24;
 public:
+	int SPRITE_WIDTH = SpriteMaker::SPRITE_WIDTH;
+	int SPRITE_HEIGHT = SpriteMaker::SPRITE_HEIGHT;
+
 	static cocos2d::Scene* createScene();
 
 	virtual bool init();
+
 	void drawBackground();
-	void createSprite(std::string file, int origin_x, int origin_y, int x, int y, int z);
 
 	// a selector callback
 	void menuCloseCallback(cocos2d::Ref* pSender);

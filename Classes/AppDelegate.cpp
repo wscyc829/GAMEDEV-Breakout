@@ -4,7 +4,7 @@
 
 USING_NS_CC;
 
-static cocos2d::Size designResolutionSize = cocos2d::Size(720, 528);
+static cocos2d::Size designResolutionSize = cocos2d::Size(1008, 528);
 static cocos2d::Size smallResolutionSize = cocos2d::Size(480, 320);
 static cocos2d::Size mediumResolutionSize = cocos2d::Size(1024, 768);
 static cocos2d::Size largeResolutionSize = cocos2d::Size(2048, 1536);
@@ -74,6 +74,12 @@ bool AppDelegate::applicationDidFinishLaunching() {
     }
 
     register_all_packages();
+
+	
+	CocosDenshion::SimpleAudioEngine::sharedEngine()->getInstance()->playBackgroundMusic("sounds/background_music.wav", true);
+	CocosDenshion::SimpleAudioEngine::sharedEngine()->getInstance()->preloadEffect("sounds/game_start_sound.wav");
+	CocosDenshion::SimpleAudioEngine::sharedEngine()->getInstance()->preloadEffect("sounds/enemy_killed_sound.wav");
+	CocosDenshion::SimpleAudioEngine::sharedEngine()->getInstance()->preloadEffect("sounds/ball_bouncing.wav");
 
     // create a scene. it's an autorelease object
     auto scene = GameMenu::createScene();
