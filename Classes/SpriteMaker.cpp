@@ -47,7 +47,7 @@ cocos2d::Sprite* SpriteMaker::createSprite(SpriteList sprite)
 			break;
 		case SpriteList::BLOCK2:
 			file_name = "images/block2.png";
-			width = SPRITE_WIDTH * 5;
+			width = SPRITE_WIDTH;
 			height = SPRITE_HEIGHT;
 			break;
 		case SpriteList::BLOCK3:
@@ -56,12 +56,12 @@ cocos2d::Sprite* SpriteMaker::createSprite(SpriteList sprite)
 			height = SPRITE_HEIGHT;
 			break;
 		case SpriteList::BLOCK_BOSS:
-			file_name = "images/block4.png";
+			file_name = "images/block_boss.png";
 			width = SPRITE_WIDTH * 2;
 			height = SPRITE_HEIGHT * 2;
 			break;
 		case SpriteList::BLOCK_TRESSURE:
-			file_name = "images/block5.png";
+			file_name = "images/block_tressure.png";
 			width = SPRITE_WIDTH;
 			height = SPRITE_HEIGHT;
 			break;

@@ -1,6 +1,7 @@
 ﻿#include "HelloWorldScene.h"
 #include "iostream"
 #include "GameMenuScene.h"
+#include "GameWinScene.h"
 
 #define SCALE_RATIO 32.0
 
@@ -167,7 +168,7 @@ void HelloWorld::defineBall(){
 	
 	ballBody = world->CreateBody(&bodyDef);
 	ballBody->CreateFixture(&fixtureDef);
-	ballBody->ApplyLinearImpulse(b2Vec2(5.0f, 5.0f), ballBody->GetWorldCenter(), false);
+	ballBody->ApplyLinearImpulse(b2Vec2(BALL_SPEED_X, BALL_SPEED_Y), ballBody->GetWorldCenter(), false);
 }
 
 void HelloWorld::definePaddle(){
@@ -258,12 +259,35 @@ void HelloWorld::spawnEnemies()
 	Vec2 p = boss->getPosition();
 	if (x > p.x - SPRITE_WIDTH && x < p.x + SPRITE_WIDTH &&
 		y > p.y - SPRITE_HEIGHT && y < p.y + SPRITE_HEIGHT){
-		log("hit boss");
 		return;
 	}
-	Sprite *block = SpriteMaker::createSprite(SpriteList::BLOCK1);
+
+	Sprite *block;
+
+	float r = rand() % 100;
+	if (r < 10)
+	{
+		block = SpriteMaker::createSprite(SpriteList::BLOCK_TRESSURE);
+
+		block->setTag(BLOCK_TRESSURE_TAG);
+	}
+	else if(r < 40)
+	{
+		block = SpriteMaker::createSprite(SpriteList::BLOCK1);
+		block->setTag(BLOCK_TAG);
+	}
+	else if (r < 70)
+	{
+		block = SpriteMaker::createSprite(SpriteList::BLOCK2);
+		block->setTag(BLOCK_TAG);
+	}
+	else
+	{
+		block = SpriteMaker::createSprite(SpriteList::BLOCK3);
+		block->setTag(BLOCK_TAG);
+	}
+
 	block->setPosition(x, y);
-	block->setTag(BLOCK_TAG);
 	this->addChild(block);
 
 	// Create block body
@@ -354,7 +378,15 @@ void HelloWorld::update(float dt)
 							== toDestroy.end()) 
 						{
 							toDestroy.push_back(bodyB);
-							score++;
+							score+= BLOCK_POINT;
+						}
+					}
+					else if (spriteB->getTag() == BLOCK_TRESSURE_TAG){
+						if (std::find(toDestroy.begin(), toDestroy.end(), bodyB)
+							== toDestroy.end())
+						{
+							toDestroy.push_back(bodyB);
+							score += BLOCK_TRESSURE_POINT;
 						}
 					}
 					else if (spriteB->getTag() == BLOCK_BOSS_TAG)
@@ -362,13 +394,12 @@ void HelloWorld::update(float dt)
 						if (boss_hp > 0)
 						{
 							boss_hp--; 
-							score++;
+							score+= BLOCK_BOSS_POINT;
 						}
 						else if (std::find(toDestroy.begin(), toDestroy.end(), bodyB)
 								== toDestroy.end()) 
 						{
 							toDestroy.push_back(bodyB);
-							score++;
 						}
 					}
 				}
@@ -380,7 +411,15 @@ void HelloWorld::update(float dt)
 						if (std::find(toDestroy.begin(), toDestroy.end(), bodyA)
 							== toDestroy.end()) {
 							toDestroy.push_back(bodyA);
-							score++;
+							score += BLOCK_POINT;
+						}
+					}
+					else if (spriteA->getTag() == BLOCK_TRESSURE_TAG)
+					{
+						if (std::find(toDestroy.begin(), toDestroy.end(), bodyA)
+							== toDestroy.end()) {
+							toDestroy.push_back(bodyA);
+							score += BLOCK_TRESSURE_POINT;
 						}
 					}
 					else if (spriteA->getTag() == BLOCK_BOSS_TAG)
@@ -388,13 +427,12 @@ void HelloWorld::update(float dt)
 						if (boss_hp > 0)
 						{
 							boss_hp--;
-							score++;
+							score += BLOCK_BOSS_POINT;
 						}
 						else if (std::find(toDestroy.begin(), toDestroy.end(), bodyB)
 								== toDestroy.end()) 
 						{
 							toDestroy.push_back(bodyB);
-							score++;
 						}
 					}
 				}
@@ -440,6 +478,16 @@ void HelloWorld::update(float dt)
 		else
 		{
 			spawn_count++;
+		}
+		if (boss_hp <= 0)
+		{
+			isReturn = true;
+			isStart = false;
+
+			CC_SAFE_DELETE(world);
+			auto director = Director::getInstance();
+			auto scene = GameWin::createScene();
+			director->replaceScene(TransitionSlideInT::create(1, scene));
 		}
 	}
 }
