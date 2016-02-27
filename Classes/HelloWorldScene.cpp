@@ -267,9 +267,9 @@ void HelloWorld::spawnEnemies()
 	float r = rand() % 100;
 	if (r < 10)
 	{
-		block = SpriteMaker::createSprite(SpriteList::BLOCK_TRESSURE);
+		block = SpriteMaker::createSprite(SpriteList::BLOCK_TREASURE);
 
-		block->setTag(BLOCK_TRESSURE_TAG);
+		block->setTag(BLOCK_TREASURE_TAG);
 	}
 	else if(r < 40)
 	{
@@ -381,12 +381,12 @@ void HelloWorld::update(float dt)
 							score+= BLOCK_POINT;
 						}
 					}
-					else if (spriteB->getTag() == BLOCK_TRESSURE_TAG){
+					else if (spriteB->getTag() == BLOCK_TREASURE_TAG){
 						if (std::find(toDestroy.begin(), toDestroy.end(), bodyB)
 							== toDestroy.end())
 						{
 							toDestroy.push_back(bodyB);
-							score += BLOCK_TRESSURE_POINT;
+							score += BLOCK_TREASURE_POINT;
 						}
 					}
 					else if (spriteB->getTag() == BLOCK_BOSS_TAG)
@@ -414,12 +414,12 @@ void HelloWorld::update(float dt)
 							score += BLOCK_POINT;
 						}
 					}
-					else if (spriteA->getTag() == BLOCK_TRESSURE_TAG)
+					else if (spriteA->getTag() == BLOCK_TREASURE_TAG)
 					{
 						if (std::find(toDestroy.begin(), toDestroy.end(), bodyA)
 							== toDestroy.end()) {
 							toDestroy.push_back(bodyA);
-							score += BLOCK_TRESSURE_POINT;
+							score += BLOCK_TREASURE_POINT;
 						}
 					}
 					else if (spriteA->getTag() == BLOCK_BOSS_TAG)

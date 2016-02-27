@@ -60,8 +60,8 @@ cocos2d::Sprite* SpriteMaker::createSprite(SpriteList sprite)
 			width = SPRITE_WIDTH * 2;
 			height = SPRITE_HEIGHT * 2;
 			break;
-		case SpriteList::BLOCK_TRESSURE:
-			file_name = "images/block_tressure.png";
+		case SpriteList::BLOCK_TREASURE:
+			file_name = "images/block_treasure.png";
 			width = SPRITE_WIDTH;
 			height = SPRITE_HEIGHT;
 			break;

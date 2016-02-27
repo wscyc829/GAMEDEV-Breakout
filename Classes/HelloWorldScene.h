@@ -19,12 +19,12 @@ class HelloWorld : public cocos2d::Layer
 	int PADDLE_TAG = 2;
 	int BLOCK_TAG = 3;
 	int BLOCK_BOSS_TAG = 4;
-	int BLOCK_TRESSURE_TAG = 5;
+	int BLOCK_TREASURE_TAG = 5;
 
 	int BOSS_MAX_HP = 20;
 	int BLOCK_POINT = 1;
 	int BLOCK_BOSS_POINT = 5;
-	int BLOCK_TRESSURE_POINT = 10;
+	int BLOCK_TREASURE_POINT = 10;
 	int PLAYER_MAX_HP = 3;
 	int SPAWN_TIME = 100;
 
