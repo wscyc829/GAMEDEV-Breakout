@@ -96,7 +96,7 @@ void HelloWorld::drawBackground()
 
 	//boss hp
 	//high score
-	boss_hp_label = Label::createWithTTF("Boss HP: 100", "fonts/Marker Felt.ttf", 24);
+	boss_hp_label = Label::createWithTTF("Boss HP: 20", "fonts/Marker Felt.ttf", 24);
 	boss_hp_label->setColor(Color3B(0, 0, 0));
 	boss_hp_label->setPosition(Vec2(visibleSize.width / 2,
 		visibleSize.height - boss_hp_label->getContentSize().height - 12));

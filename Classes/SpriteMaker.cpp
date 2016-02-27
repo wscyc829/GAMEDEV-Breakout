@@ -11,7 +11,7 @@ cocos2d::Sprite* SpriteMaker::createSprite(SpriteList sprite)
 	switch (sprite)
 	{
 		case SpriteList::BALL:
-			file_name = "images/ball.png";
+			file_name = "images/stone.png";
 			width = SPRITE_WIDTH;
 			height = SPRITE_HEIGHT;
 			break;
